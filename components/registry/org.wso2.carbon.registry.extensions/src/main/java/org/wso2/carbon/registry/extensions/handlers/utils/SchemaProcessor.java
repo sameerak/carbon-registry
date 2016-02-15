@@ -185,7 +185,7 @@ public class SchemaProcessor {
                     requestContext.getResource().getProperty(RegistryConstants.SYMLINK_PROPERTY_NAME));
 
             Resource metaResource = requestContext.getResource();
-            path = saveSchemaToRegistry(requestContext, resourcePath, symlinkLocation, metaResource,disableSymlinkCreation);
+            path = saveSchemaToRegistry(requestContext, resourcePath, symlinkLocation, metaResource,disableSymlinkCreation, version);
             persistAssociations(path);
         }
         return path;
@@ -237,7 +237,7 @@ public class SchemaProcessor {
         String symlinkLocation = requestContext.getResource().getProperty(RegistryConstants.SYMLINK_PROPERTY_NAME);
 
         Resource metaResource = requestContext.getResource();
-        String path = saveSchemaToRegistry(requestContext, resourcePath, symlinkLocation, metaResource,disableSymlinkCreation); // should depend on the central location / relative location flag
+        String path = saveSchemaToRegistry(requestContext, resourcePath, symlinkLocation, metaResource,disableSymlinkCreation, version); // should depend on the central location / relative location flag
         persistAssociations(path);
         return path;
     }
@@ -548,7 +548,7 @@ public class SchemaProcessor {
             throws RegistryException {
         updateSchemaPaths(commonSchemaLocation,requestContext.getResource().getProperty("version"), requestContext);
         updateSchemaInternalsAndAssociations();
-        String path = saveSchemaToRegistry(requestContext, null, symlinkLocation, metaResource,disableSymlinkCreation);
+        String path = saveSchemaToRegistry(requestContext, null, symlinkLocation, metaResource,disableSymlinkCreation,requestContext.getResource().getProperty("version"));
         persistAssociations(path);
         return path;
     }
@@ -557,14 +557,14 @@ public class SchemaProcessor {
             throws RegistryException {
         updateSchemaPaths(commonSchemaLocation,version,dependencies, requestContext);
         updateSchemaInternalsAndAssociations();
-        String path = saveSchemaToRegistry(requestContext, null, symlinkLocation, metaResource,disableSymlinkCreation);
+        String path = saveSchemaToRegistry(requestContext, null, symlinkLocation, metaResource,disableSymlinkCreation, version);
         persistAssociations(path);
         return path;
     }
 
     @SuppressWarnings("unchecked")
     private String saveSchemaToRegistry(RequestContext requestContext, String resourcePath,
-                                        String symlinkLocation, Resource metaResource,boolean disableSymlinkCreation)
+                                        String symlinkLocation, Resource metaResource,boolean disableSymlinkCreation, String version)
             throws RegistryException {
         String path = resourcePath;
         for (SchemaInfo schemaInfo: schemas.values()) {
@@ -622,6 +622,9 @@ public class SchemaProcessor {
 
             if(metaResource != null){
                 xsdResource.setDescription(metaResource.getDescription());
+            }
+            if (!StringUtils.isEmpty(version) && StringUtils.isEmpty(xsdResource.getProperty("version"))){
+                xsdResource.setProperty("version", version);
             }
             String targetNamespace = schema.getTargetNamespace();
             xsdResource.setProperty("targetNamespace", targetNamespace);

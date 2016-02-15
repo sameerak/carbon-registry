@@ -40,6 +40,7 @@ import org.wso2.carbon.registry.extensions.utils.CommonConstants;
 import org.wso2.carbon.registry.extensions.utils.CommonUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLUtil;
 import org.wso2.carbon.registry.extensions.utils.WSDLValidationInfo;
+import org.wso2.carbon.utils.xml.StringUtils;
 import org.xml.sax.InputSource;
 
 import javax.wsdl.*;
@@ -311,10 +312,10 @@ public class WSDLProcessor {
         String masterWSDLPath;
         if (!isDefaultEnvironment) {
             schemaProcessor.saveSchemasToRegistry(context, currentSchemaLocation,
-                    null, null,masterVersion,listOfDependencies,disableSymLinkCreation);
+                    null, null,version,listOfDependencies,disableSymLinkCreation);
             updateWSDLSchemaLocations();
             masterWSDLPath = saveWSDLsToRepositoryNew(context, symlinkLocation, metadata,currentEndpointLocation
-                    ,listOfDependencies,masterVersion,disableSymLinkCreation);// 3rd parameter is false, for importing WSDLs.
+                    ,listOfDependencies,version,disableSymLinkCreation);// 3rd parameter is false, for importing WSDLs.
 
             addPolicyImportys(context, version);
 
@@ -324,7 +325,7 @@ public class WSDLProcessor {
                     null, null, version, listOfDependencies, disableSymLinkCreation);
             updateWSDLSchemaLocations();
 
-            masterWSDLPath = saveWSDLsToRepositoryNew(context, symlinkLocation, metadata,disableSymLinkCreation);// 3rd parameter is false, for importing WSDLs.
+            masterWSDLPath = saveWSDLsToRepositoryNew(context, symlinkLocation, metadata,disableSymLinkCreation, version);// 3rd parameter is false, for importing WSDLs.
 
             addPolicyImportys(context, version);
 
@@ -719,7 +720,7 @@ public class WSDLProcessor {
 
     @SuppressWarnings("unchecked")
     private String saveWSDLsToRepositoryNew(RequestContext context, String symlinkLocation,
-                                            Resource metaDataResource,boolean disableSymLinkCreation)
+                                            Resource metaDataResource,boolean disableSymLinkCreation, String version)
             throws RegistryException {
         String masterWSDLPath = null;
         try {
@@ -765,6 +766,9 @@ public class WSDLProcessor {
                 masterWSDLPath = addProperties(masterWSDLPath, wsdlInfo, wsdlDefinition, wsdlResourceContent, wsdlPath, wsdlResource);
                 if (metaDataResource != null) {
                     wsdlResource.setDescription(metaDataResource.getDescription());
+                }
+                if (StringUtils.isEmpty(wsdlResource.getProperty("version")) && !StringUtils.isEmpty(version)){
+                    wsdlResource.setProperty("version", version);
                 }
                 boolean newWSDLUpload = !registry.resourceExists(wsdlPath);
                 if (metaDataResource != null && metaDataResource.getProperty(CommonConstants.SOURCE_PROPERTY) != null) {
@@ -995,6 +999,9 @@ public class WSDLProcessor {
                             }
                         }
                     }
+                }
+                if (StringUtils.isEmpty(wsdlResource.getProperty("version")) &&  !StringUtils.isEmpty(version)){
+                    wsdlResource.setProperty("version", version);
                 }
                 if (context.getResource().getProperty(CommonConstants.SOURCE_PROPERTY) != null){
                     wsdlResource.setProperty(CommonConstants.SOURCE_PROPERTY, CommonConstants.SOURCE_AUTO);
