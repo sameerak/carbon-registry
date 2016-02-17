@@ -62,6 +62,17 @@
     </modules>
 
     <repositories>
+       <repository>
+            <id>wso2.444</id>
+            <name>Apache Snapshot Repository</name>
+            <url>http://maven.wso2.org/nexus/content/repositories/orgwso2carbon-328/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>daily</updatePolicy>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+        </repository>
+
         <repository>
             <id>wso2-nexus</id>
             <name>WSO2 internal Repository</name>
